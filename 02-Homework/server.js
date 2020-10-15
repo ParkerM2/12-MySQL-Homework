@@ -14,16 +14,27 @@ app.listen(PORT, function() {
   console.log("Server listening on: http://localhost:" + PORT);
 });
 
+function callDB () {
+    orm.viewCurrentDB("company", function (result) {
+        var data = result;
+        console.log("Data retrieved from the DATABASE")
+    })
+};
 // function for CLI APP Prompt
 function promptCompanyDB() {
     return inquirer.prompt([
         {
             type: "list",
-            message: "Would you like to Add, View, or Update the Company DB?",
+            message: "Would you like to do??",
             name: "answer",
             choices: [
-                "Add Departments, Roles, Employees",
-                "View Departments, Roles, Employees",
+                "View DB",
+                "View all Employees",
+                "View all Employees by Manager",
+                "View all Employees by Department",
+                "Add Departments",
+                "Add Roles",
+                "Add Employees",
                 "Update Employee Roles",
             ]
         }
@@ -34,10 +45,32 @@ function promptCompanyDB() {
                 addToDB();
                 break;
             case 'View Departments, Roles, Employees':
+                // orm.func
                 viewDB();
                 break;
-            case 'Update Employee Roles':
+            case 'View all Employees':
+                // orm.func?
+                viewAllEmployees();
+                break;
+            case 'View all Employees by Manager':
+                // orm.function?
+                break;
+            case 'View all Employees by Department':
+                //orm.func?
+                break;
+            case 'Add Departments':
+                //orm
+                break;
+            case 'Add Roles':
+                break;
+            case 'Add Employees':
+                break;
+            case 'Update Employee Role':
                 updateEmployeeRole();
+                break;
+            case 'Update Employee Manager':
+                break;
+            case 'Remove Employee':
                 break;
             default:
                 console.log("You must select one!")
@@ -80,10 +113,13 @@ function viewDB() {
         var data = result;
         console.log("Data retrieved from the DATABASE")
         console.table(data)
-    });
+        promptCompanyDB()
+    })
 }
 
 function updateEmployeeRole() {
+    callDB(data);
+    console.log(data);
     inquirer.prompt([
         {
             type: "input",
@@ -98,8 +134,8 @@ function updateEmployeeRole() {
     ]).then(answers => {
         const { employees_id, roles } = answers;
         orm.updateEmployeeRole(employees_id, roles, function (result) {
-            var data = result;
-            console.log("Results : ", data)
+            // var data = result;
+            // console.log("Results : ", data)
         })
     })
 }

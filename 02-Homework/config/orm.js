@@ -10,12 +10,21 @@ function printQuestionMarks(num) {
   return arr.toString();
 }
 var orm = {
-    addToCompanyDB: function (table, department, roles, employees, cb) {
-        queryString = "INSERT INTO " + table + " (department, roles, employees) Values (?, ? , ?)";
-        connection.query(queryString,[department, roles, employees], function (err, result) {
+    all: function (table, cb) {
+        table = "company";
+        var queryString = "SELECT * FROM " + table + ";";
+        connection.query(queryString, function (err, result) {
+            if (err) { throw err };
+            console.table(result, "inside connection query")
+            cb(result);
+        })
+    },
+    addToCompanyDB: function (table, department, roles, first_name, last_name, cb) {
+        queryString = "INSERT INTO " + table + " (department, roles, first_name, last_name) Values (?, ? , ?)";
+        connection.query(queryString,[department, roles, first_name, last_name], function (err, result) {
             if (err) { throw err };
 
-            cb(result)
+            cb(result);
         });
     },
     viewCurrentDB: function (table, cb) {
@@ -23,13 +32,14 @@ var orm = {
         connection.query(queryString, function (err, result) {
             if (err) { throw err };
             
-            cb(result)
+            cb(result);
         });
     },
     updateEmployeeRole: function (employees_id, roles, cb) {
         queryString = "UPDATE company SET roles='" + roles + "' WHERE id='" + employees_id + "'"; 
         connection.query(queryString, function (err, result) {
             if (err) { throw err };
+
             cb(result);
         });
     }
