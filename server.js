@@ -77,7 +77,7 @@ function promptCompanyDB() {
                 promptCompanyDB();
         };
     })
-}
+};
 promptCompanyDB();
 
 // function to call the orm for adding to the db
@@ -115,7 +115,7 @@ function viewDB() {
         console.table(data)
         promptCompanyDB()
     })
-}
+};
 
 function updateEmployeeRole() {
     callDB(data);
@@ -138,4 +138,4 @@ function updateEmployeeRole() {
             // console.log("Results : ", data)
         })
     })
-}
+};
