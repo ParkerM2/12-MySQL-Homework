@@ -1,4 +1,5 @@
 var connection = require("./connection.js");
+var inquirer = require("inquirer");
 // orm object to store methods for the command line application to reference to 'add departments, roles, employees', 'view departments, roles, employees', 'update employee roles'
 function printQuestionMarks(num) {
   var arr = [];
@@ -10,37 +11,180 @@ function printQuestionMarks(num) {
   return arr.toString();
 }
 var orm = {
-    all: function (table, cb) {
+     before: function (table,cb) {
+        orm.all(table, cb)
+    },
+    
+    prompt: function () {
+        inquirer.prompt([
+            {
+                type: "list",
+                message: "Would you like to do??",
+                name: "answer",
+                choices: [
+                    "Add Departments, Roles, Employees",
+                    "View Departments, Roles, Employees",
+                    "View all Employees",
+                    "View all Employees by Manager",
+                    "View all Employees by Department",
+                    "Add Departments",
+                    "Add Roles",
+                    "Add Employees",
+                    "Update Employee Roles",
+                    "Remove Employee",
+                ]
+            }
+        ]).then(result => {
+            
+            switch (result.answer) {
+                case 'Add Departments, Roles, Employees':
+                    orm.addToCompanyDB();
+                    break;
+                case 'View Departments, Roles, Employees':
+                    // orm.func
+                    orm.viewCurrentDB("company")
+                    break;
+                case 'View all Employees':
+                    // orm.func?
+                    // viewEmployees();
+                    orm.viewAllEmployees();
+                    break;
+                case 'View all Employees by Manager':
+                    // orm.function
+                    orm.viewEmployeeByManager();
+                    break;
+                case 'View all Employees by Department':
+                    //orm.func?
+                    break;
+                case 'Add Departments':
+                    //orm
+                    break;
+                case 'Add Roles':
+                    break;
+                case 'Add Employees':
+                    break;
+                case 'Update Employee Role':
+                    updateEmployeeRole();
+                    break;
+                case 'Update Employee Manager':
+                    break;
+                case 'Remove Employee':
+                    orm.removeEmployee();
+                    break;
+                default:
+                    console.log("You must select one!")
+                // promptCompanyDB();
+            };
+        });
+    },
+
+    // selects all from the company database
+    all: function (table) {
         table = "company";
         var queryString = "SELECT * FROM " + table + ";";
         connection.query(queryString, function (err, result) {
             if (err) { throw err };
-            console.table(result, "inside connection query")
-            cb(result);
+            console.table(result)
+            orm.prompt()
         })
+        
     },
-    addToCompanyDB: function (table, department, roles, first_name, last_name, cb) {
-        queryString = "INSERT INTO " + table + " (department, roles, first_name, last_name) Values (?, ? , ?)";
-        connection.query(queryString,[department, roles, first_name, last_name], function (err, result) {
-            if (err) { throw err };
+    // takes in 3 prompts and adds the 'department', 'roles', and 'employees' fields.
+    addToCompanyDB: function () {
+        inquirer.prompt([
+            {
+                type: "input",
+                message: "Enter The Department you would like to Add",
+                name: "department"
+            },
+            {
+                type: "input",
+                message: "Enter the roles you would like to Add",
+                name: "roles"
+            },
+            {
+                type: "input",
+                message: "Enter the employee's first name :",
+                name: "first_name"
+            },
+            {
+                type: "input",
+                message: "Enter the employee's last name :",
+                name: "last_name"
+            },
+            {
+                type: "input",
+                message: "Enter the employee's Salary :",
+                name: "salary"
+            },
+        ]).then(answers => {
+            console.table(answers)
+            const { department, roles, first_name, last_name, salary } = answers;
 
-            cb(result);
+            queryString = "INSERT INTO company (department, roles, first_name, last_name, salary) Values (?, ?, ? , ?, ?)";
+            connection.query(queryString, [department, roles, first_name, last_name, salary], function (err, result) {
+                if (err) { throw err };
+                console.log("This employee has been added to the company database")
+            });
+            orm.prompt();
         });
+       
     },
-    viewCurrentDB: function (table, cb) {
+    viewCurrentDB: function (table) {
         queryString = "SELECT * FROM " + table;
         connection.query(queryString, function (err, result) {
             if (err) { throw err };
             
-            cb(result);
+            console.table(result)
+            console.log("ALL RESULTS FROM company")
+            orm.prompt();
         });
     },
-    updateEmployeeRole: function (employees_id, roles, cb) {
+    updateEmployeeRole: function (employees_id, roles) {
         queryString = "UPDATE company SET roles='" + roles + "' WHERE id='" + employees_id + "'"; 
         connection.query(queryString, function (err, result) {
             if (err) { throw err };
-
-            cb(result);
+            console.log(result);
+        });
+    },
+    viewAllEmployees: function (cb) {
+        queryString = "SELECT first_name, last_name FROM company";
+        connection.query(queryString, function (err, result) {
+            if (err) { throw err };
+            console.table(result);
+        });
+        
+    },
+    viewEmployeeByManager: function (manager) {
+        queryString = " SELECT * from company(first_name, last_name) WHERE manager(?)", [manager];
+        connection.query(queryString, function (err, result) {
+            if (err) { throw err };
+            console.log(result);df
+        });
+    },
+    choices: function () {
+        connection.query("SELECT first_name FROM company", function (err, result) {
+            if (err) { throw err };
+            employeeArr = []
+            var data = result;
+            employeeArr.push(data)
+            console.log("employee array")
+            return employeeArr;
+        });
+                },
+    removeEmployee: function () {
+        inquirer.prompt([
+            {
+                type: "choices",
+                message: "Choose Which Employee you would like to remove",
+                choices: employeeArr,
+                name: "first_name"
+            },
+            {
+                type: "choices,"
+            }
+        ]).then(answers => {
+            console.log(answers)
         });
     }
 
