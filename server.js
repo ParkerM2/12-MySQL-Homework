@@ -7,7 +7,8 @@ var app = express();
 var connection = require("./config/connection.js");
 const { viewEmployeeByManager, viewAllEmployees } = require("./config/orm.js");
 var PORT = 8080;
-
+// const Sequelize = require('sequelize');
+// const sequelize = new Sequelize("mysql");
 
 
 // Start our server so that it can begin listening to client requests.
