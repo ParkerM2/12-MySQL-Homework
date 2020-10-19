@@ -1,5 +1,6 @@
 var connection = require("./connection.js");
 var inquirer = require("inquirer");
+const { Console } = require("console");
 // orm object to store methods for the command line application to reference to 'add departments, roles, employees', 'view departments, roles, employees', 'update employee roles'
 function printQuestionMarks(num) {
   var arr = [];
@@ -12,6 +13,7 @@ function printQuestionMarks(num) {
 }
 var orm = {
     before: function (table, cb) {
+        console.log("Current company DB")
         orm.all(table, cb)
     },
     
@@ -46,7 +48,6 @@ var orm = {
                     break;
                 case 'View all Employees':
                     // orm.func?
-                    // viewEmployees();
                     orm.viewAllEmployees();
                     break;
                 case 'View all Employees by Manager':
@@ -54,10 +55,10 @@ var orm = {
                     orm.viewEmployeeByManager();
                     break;
                 case 'View all Employees by Department':
-                    //orm.func?
+                    orm.viewEmployeeByDepartment();
                     break;
                 case 'Add Departments':
-                    //orm
+                    orm.viewAllDepartments();
                     break;
                 case 'Add Roles':
                     break;
@@ -147,41 +148,54 @@ var orm = {
             console.log(result);
         });
     },
-    viewAllEmployees: async function (cb) {
+    viewAllEmployees: function () {
         queryString = "SELECT first_name, last_name FROM company";
         connection.query(queryString, function (err, result) {
             if (err) { throw err };
             console.table(result);
-            orm.before();
-        });
-        
-    },
-    viewEmployeeByManager: async function (manager) {
-        queryString = "SELECT * FROM company WHERE manager = ?"
-        connection.query(queryString,[manager], function (err, result) {
-            if (err) { throw err };
-            var data = result;
-            data.map(item => {
-                data = JSON.parse(JSON.stringify(item));
-                console.table(data);
-            });
             orm.prompt();
         });
     },
-    // queryEmployeeNames: async function () {
-    //     let nameArray = []
-    //     connection.query("SELECT first_name, last_name FROM company", function (err, result) {
-    //         if (err) { throw err };
-    //         let nameArray = [];
-    //         var data = result;
-    //         data.map(item => {
-    //             data = JSON.parse(JSON.stringify(item.first_name + " " + item.last_name));
-    //             nameArray.push(data)
-    //         });
-            
-    //     });
-    //     return nameArray;
-    // },
+    viewAllDepartments: function () {
+        queryString = "SELECT department FROM company";
+        connection.query(queryString, function (err, result) {
+            if (err) { throw err };
+            console.table(result);
+            orm.prompt();
+        })
+    },
+    viewEmployeeByManager: async function () {
+        connection.query("SELECT manager FROM company", function (err, result) {
+            if (err) { throw err };
+            var data = result
+            var managers = [];
+            data.map(item => { data = JSON.parse(JSON.stringify(item)); managers.push(data) });
+            console.log(managers[0].manager) 
+            let updatedManagers = [];
+            updatedManagers.push(managers[0].manager)
+            inquirer.prompt([
+                {
+                    type: "list",
+                    message: "Which manager would you like to search by?",
+                    choices: updatedManagers,
+                    name: "manager",
+                }
+            ]).then(manager => {
+                queryString = "SELECT FROM company WHERE manager='" + manager + "'";
+                connection.query(queryString, [manager], function (err, result) {
+                    if (err) { throw err };
+                    var data = result;
+                    console.table(data)
+                    // data.map(item => {
+                    //     data = JSON.parse(JSON.stringify(item));
+                    //     console.table(data);
+                    // });
+                    
+                })
+            });
+        
+        });
+    },
     removeEmployee: async function () {
         connection.query("SELECT first_name, last_name FROM company", function (err, result) {
             if (err) { throw err };
@@ -191,7 +205,6 @@ var orm = {
                 data = JSON.parse(JSON.stringify(item.first_name + " " + item.last_name));
                 nameArray.push(data)
             });
-       
             inquirer.prompt([
                 {
                     type: "list",
@@ -206,13 +219,39 @@ var orm = {
                 connection.query("DELETE FROM company WHERE first_name='" + first_name[0] + "' AND last_name='" + first_name[1] + "'"), function (err, result) {
                     if (err) { throw err } else {
                         console.log("results from delete query")
-                    
                         orm.before()
-                    }
+                    };
                 };
+                orm.before("company");
             });
         });
-     }
+    },
+    viewEmployeeByDepartment: function () {
+        connection.query("SELECT department FROM company", function (err, result) {
+            if (err) { throw err };
+            var data = result
+            var departments = [];
+            data.map(item => { data = JSON.parse(JSON.stringify(item)); departments.push(data.department) });
+            inquirer.prompt([
+                {
+                    type: "list",
+                    message: "Which department would you like to search by?",
+                    choices: departments,
+                    name: "department",
+                }
+            ]).then(answer => {
+                let department = answer.department;
+                let queryString = "SELECT * FROM company WHERE department='" + department + "'";
+                connection.query(queryString, [department], function (err, result) {
+                    if (err) { throw err };
+                    var data =  result;
+                    data.map(item => { data = JSON.parse(JSON.stringify(item)); console.table(data); });
+                    orm.prompt();
+                })
+            });
+        
+        });
+    },
 }
 
 module.exports = orm;
