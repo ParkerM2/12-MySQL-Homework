@@ -173,39 +173,33 @@ var orm = {
     //     });
     // },
     removeEmployee: function () {
-        let first_name = [];
-        let resultArray = []
-        connection.query("SELECT first_name, last_name FROM company", function (err, result) {
-            if (err) { throw err };
-            var data = result;
-            resultArray = Object.values(JSON.parse(JSON.stringify(data)));
-            console.log(resultArray)
-            for (i = 0; i < resultArray.length; i++){
-                resultArray[i].push(Object.keys(resultArray));
-            };
-            //first_name.push(resultArray.map(item => { console.log(Object.values(item)) }));
-        
-            inquirer.prompt([
-                
-                {
-                    type: "list",
-                    message: "Choose Which Employee you would like to remove",
-                    choices: resultArray,
-                    name: "first_name"
-                },
-                {
-                    type: "list",
-                    message: "Choose the Employees last name",
-                    choices: first_name,
-                    name: "last_name"
-                }
-            ]).then(answers => {
-                console.log(answers)
+            connection.query("SELECT first_name FROM company", function (err, result) {
+                if (err) { throw err };
+                var data = result;
+                var resultArray = []
+                data.map(item => {
+                    data = JSON.parse(JSON.stringify(item.first_name));
+                    resultArray.push(data)
+                });
+                console.log(resultArray)
+                inquirer.prompt([
+                    {
+                        type: "list",
+                        message: "Choose Which Employee you would like to remove",
+                        choices: resultArray,
+                        name: "first_name"
+                    },
+                    {
+                        type: "list",
+                        message: "Choose the Employees last name",
+                        choices: resultArray,
+                        name: "last_name"
+                    }
+                ]).then(answers => {
+                    // console.log(answers)
+                })
             })
-    
-        })
         }
-   
-};
+}
 
 module.exports = orm;
