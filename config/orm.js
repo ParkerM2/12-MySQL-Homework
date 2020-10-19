@@ -1,6 +1,4 @@
 var connection = require("./connection.js");
-// const Sequelize = require('sequelize');
-// const sequelize = new Sequelize("mysql");
 var inquirer = require("inquirer");
 // orm object to store methods for the command line application to reference to 'add departments, roles, employees', 'view departments, roles, employees', 'update employee roles'
 function printQuestionMarks(num) {
@@ -132,74 +130,89 @@ var orm = {
         });
        
     },
-    viewCurrentDB: function (table) {
+    viewCurrentDB: async function (table) {
         queryString = "SELECT * FROM " + table;
         connection.query(queryString, function (err, result) {
             if (err) { throw err };
             
             console.table(result)
             console.log("ALL RESULTS FROM company")
-            orm.prompt();
+            orm.before();
         });
     },
-    updateEmployeeRole: function (employees_id, roles) {
+    updateEmployeeRole: async function (employees_id, roles) {
         queryString = "UPDATE company SET roles='" + roles + "' WHERE id='" + employees_id + "'";
         connection.query(queryString, function (err, result) {
             if (err) { throw err };
             console.log(result);
         });
     },
-    viewAllEmployees: function (cb) {
+    viewAllEmployees: async function (cb) {
         queryString = "SELECT first_name, last_name FROM company";
         connection.query(queryString, function (err, result) {
             if (err) { throw err };
             console.table(result);
+            orm.before();
         });
         
     },
-    viewEmployeeByManager: function (manager) {
-        queryString = " SELECT * from company(first_name, last_name) WHERE manager(?)", [manager];
-        connection.query(queryString, function (err, result) {
+    viewEmployeeByManager: async function (manager) {
+        queryString = "SELECT * FROM company WHERE manager = ?"
+        connection.query(queryString,[manager], function (err, result) {
             if (err) { throw err };
-            console.log(result); df
+            var data = result;
+            data.map(item => {
+                data = JSON.parse(JSON.stringify(item));
+                console.table(data);
+            });
+            orm.prompt();
         });
     },
-    // choices: async function () {
+    // queryEmployeeNames: async function () {
+    //     let nameArray = []
     //     connection.query("SELECT first_name, last_name FROM company", function (err, result) {
     //         if (err) { throw err };
-    //         var resultArray = Object.values(JSON.parse(JSON.stringify(data)))
-    //         console.log(resultArray)
-    //         return resultArray;
+    //         let nameArray = [];
+    //         var data = result;
+    //         data.map(item => {
+    //             data = JSON.parse(JSON.stringify(item.first_name + " " + item.last_name));
+    //             nameArray.push(data)
+    //         });
+            
     //     });
+    //     return nameArray;
     // },
-    removeEmployee: function () {
-            connection.query("SELECT first_name FROM company", function (err, result) {
-                if (err) { throw err };
-                var data = result;
-                var resultArray = []
-                data.map(item => {
-                    data = JSON.parse(JSON.stringify(item.first_name));
-                    resultArray.push(data)
-                });
-                console.log(resultArray)
-                inquirer.prompt([
-                    {
-                        type: "list",
-                        message: "Choose Which Employee you would like to remove",
-                        choices: resultArray,
-                        name: "first_name"
-                    },
-                    {
-                        type: "list",
-                        message: "Choose the Employees last name",
-                        choices: resultArray,
-                        name: "last_name"
+    removeEmployee: async function () {
+        connection.query("SELECT first_name, last_name FROM company", function (err, result) {
+            if (err) { throw err };
+            let nameArray = [];
+            var data = result;
+            data.map(item => {
+                data = JSON.parse(JSON.stringify(item.first_name + " " + item.last_name));
+                nameArray.push(data)
+            });
+       
+            inquirer.prompt([
+                {
+                    type: "list",
+                    message: "Choose Which Employee you would like to remove",
+                    choices: nameArray,
+                    name: "name"
+                },
+            ]).then(answers => {
+                console.log(answers.name, "answers.name")
+                var first_name = answers.name.split(" ")
+                console.log(first_name, "after");
+                connection.query("DELETE FROM company WHERE first_name='" + first_name[0] + "' AND last_name='" + first_name[1] + "'"), function (err, result) {
+                    if (err) { throw err } else {
+                        console.log("results from delete query")
+                    
+                        orm.before()
                     }
-                ]).then(answers => {
-                    // console.log(answers)
-                })
-            })
-        }
+                };
+            });
+        });
+     }
 }
 
 module.exports = orm;
