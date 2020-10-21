@@ -1,6 +1,6 @@
 var connection = require("./connection.js");
 var inquirer = require("inquirer");
-const { Console } = require("console");
+// const { Console } = require("console");
 // orm object to store methods for the command line application to reference to 'add departments, roles, employees', 'view departments, roles, employees', 'update employee roles'
 function printQuestionMarks(num) {
   var arr = [];
@@ -181,19 +181,15 @@ var orm = {
                     name: "manager",
                 }
             ]).then(manager => {
-                queryString = "SELECT FROM company WHERE manager='" + manager + "'";
+                manager = manager.manager
+                queryString = "SELECT * FROM company WHERE manager=?";
                 connection.query(queryString, [manager], function (err, result) {
                     if (err) { throw err };
                     var data = result;
                     console.table(data)
-                    // data.map(item => {
-                    //     data = JSON.parse(JSON.stringify(item));
-                    //     console.table(data);
-                    // });
-                    
+                    orm.before();
                 })
             });
-        
         });
     },
     removeEmployee: async function () {
@@ -213,9 +209,8 @@ var orm = {
                     name: "name"
                 },
             ]).then(answers => {
-                console.log(answers.name, "answers.name")
                 var first_name = answers.name.split(" ")
-                console.log(first_name, "after");
+                console.log("Removed Employee =>", first_name[0] + first_name[1]);
                 connection.query("DELETE FROM company WHERE first_name='" + first_name[0] + "' AND last_name='" + first_name[1] + "'"), function (err, result) {
                     if (err) { throw err } else {
                         console.log("results from delete query")
@@ -244,14 +239,16 @@ var orm = {
                 let queryString = "SELECT * FROM company WHERE department='" + department + "'";
                 connection.query(queryString, [department], function (err, result) {
                     if (err) { throw err };
-                    var data =  result;
-                    data.map(item => { data = JSON.parse(JSON.stringify(item)); console.table(data); });
+                    var data = result;
+                    let list = [];
+                    data.map(item => { data = JSON.parse(JSON.stringify(item)); list.push(data) });
+                    console.table(list)
+                    
                     orm.prompt();
                 })
             });
-        
         });
-    },
+    }
 }
 
 module.exports = orm;
