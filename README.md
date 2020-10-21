@@ -22,7 +22,7 @@
 npm install
 ```
 
-[DEMO](https://github.com/ParkerM2/12-MySQL-Homework.git)
+![gif](https://github.com/ParkerM2/12-MySQL-Homework/blob/main/Assets/mysqlgif.gif)
 
 ## Usage
 
