@@ -5,8 +5,8 @@ const inquirer = require("inquirer");
 var orm = require("./config/orm.js");
 var app = express();
 var connection = require("./config/connection.js");
-const { viewEmployeeByManager, viewAllEmployees } = require("./config/orm.js");
-var PORT = 8080;
+// const { viewEmployeeByManager, viewAllEmployees } = require("./config/orm.js");
+var PORT = 8000;
 // const Sequelize = require('sequelize');
 // const sequelize = new Sequelize("mysql");
 
