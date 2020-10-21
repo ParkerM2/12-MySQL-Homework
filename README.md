@@ -22,6 +22,8 @@
 npm install
 ```
 
+[DEMO](https://github.com/ParkerM2/12-MySQL-Homework.git)
+
 ## Usage
 
 ```sh
